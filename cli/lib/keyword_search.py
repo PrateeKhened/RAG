@@ -6,9 +6,14 @@ def search(query: str, limit: int = DEFAULT_SEARCH_LIMIT) -> list[dict]:
     results = []
 
     for movie in movies:
-        if query in movie['title']:
+        preprocessed_query = preprocessed_text(query)
+        preprocessed_title = preprocessed_text(movie['title'])
+        if preprocessed_query in preprocessed_title:
             results.append(movie)
             if len(results) > 5: 
                 break
 
     return results
+
+def preprocessed_text(text: str) -> str:
+    return text.lower()
