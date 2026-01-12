@@ -40,10 +40,20 @@ class InvertedIndex():
 
         with open(self.docmap_path, "wb") as f:
             pickle.dump(self.docmap, f)
+    
+    def load(self, cache_dir: str = CACHE_DIR):
+        if not os.path.exists(self.index_path):
+            raise FileNotFoundError(f"Missing file: {self.index_path}")
+        if not os.path.exists(self.docmap_path):
+            raise FileNotFoundError(f"Missing file: {self.docmap_path}")
+
+        with open(self.index_path, "rb") as f:
+            self.index = pickle.load(f)
+        with open(self.docmap_path, "rb") as f:
+            self.docmap = pickle.load(f)
+        
 
 def build_comand() -> None:
     idx = InvertedIndex()
     idx.build()
     idx.save()
-    docs = idx.get_documents("merida")
-    print(f"First document for token 'merida' = {docs[0]}")

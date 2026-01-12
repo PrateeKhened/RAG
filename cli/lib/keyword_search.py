@@ -1,27 +1,23 @@
-from .search_utils import DEFAULT_SEARCH_LIMIT, load_movies, read_stopwords
+from .search_utils import DEFAULT_SEARCH_LIMIT, read_stopwords
 import string
 from nltk.stem import PorterStemmer
+from .inverted_index import InvertedIndex
 
 def search(query: str, limit: int = DEFAULT_SEARCH_LIMIT) -> list[dict]:
-    movies = load_movies()
-    
-    results = []
+    indx = InvertedIndex() 
+    indx.load()
+    preprocessed_query = tokenize_text(query)
+    return all_matching_token(preprocessed_query, indx, limit)
 
-    for movie in movies:
-        preprocessed_query = tokenize_text(query)
-        preprocessed_title = tokenize_text(movie['title'])
-        if has_matching_token(preprocessed_query, preprocessed_title):
-            results.append(movie)
-            if len(results) > 5: 
-                break
-    return results
-
-def has_matching_token(query_token: list[str], title_token: list[str]) -> bool:
+def all_matching_token(query_token: list[str], indx: InvertedIndex, limit: int = DEFAULT_SEARCH_LIMIT) -> list:
+    result = [] 
     for q in query_token:
-        for t in title_token:
-            if q in t:
-                return True
-    return False
+        if q in indx.index:
+            for d in indx.index[q]:
+                result.append(indx.docmap[d])
+                if len(result) >= limit:
+                    return result
+    return result
 
 def preprocessed_text(text: str) -> str:
     table = str.maketrans('', '', string.punctuation)
