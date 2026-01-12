@@ -8,12 +8,16 @@ def search(query: str, limit: int = DEFAULT_SEARCH_LIMIT) -> list[dict]:
     return all_matching_token(preprocessed_query, indx, limit)
 
 def all_matching_token(query_token: list[str], indx: InvertedIndex, limit: int = DEFAULT_SEARCH_LIMIT) -> list:
-    result = [] 
+    results = [] 
+    seen = set() 
     for q in query_token:
         if q in indx.index:
             docs = indx.get_documents(q)
-            for doc in docs:
-                result.append(indx.docmap[doc])
-                if len(result) >= limit:
-                    return result
-    return result
+            for doc_id in docs:
+                if doc_id in seen:
+                    continue
+                seen.add(doc_id)
+                results.append(indx.docmap[doc_id])
+                if len(results) >= limit:
+                    return results
+    return results
