@@ -1,6 +1,5 @@
 import pickle
-from .search_utils import load_movies, CACHE_DIR
-from .keyword_search import tokenize_text
+from .search_utils import load_movies, CACHE_DIR, tokenize_text
 from typing import Dict, Set
 import os 
 

@@ -1,5 +1,7 @@
 import json
 import os 
+import string
+from nltk.stem import PorterStemmer
 
 DEFAULT_SEARCH_LIMIT = 5 
 
@@ -17,3 +19,30 @@ def load_movies() -> list[dict]:
 def read_stopwords() -> list[str]:
     with open(STOPWORDS_PATH, "r") as f:
         return f.read().splitlines()
+
+def preprocessed_text(text: str) -> str:
+    table = str.maketrans('', '', string.punctuation)
+    text = text.translate(table)
+    return text.lower()
+
+def tokenize_text(text: str) -> list[str]:
+    text = preprocessed_text(text)
+    stopwords = read_stopwords()
+    stemmer = PorterStemmer()
+
+    valid_tokens = []
+    stopwords_removed_tokens = []
+    stemmed_tokens = []
+
+    for t in text.split():
+        if t:
+            valid_tokens.append(t)
+
+    for token in valid_tokens:
+        if token not in stopwords:
+            stopwords_removed_tokens.append(token)
+    
+    for token in stopwords_removed_tokens:
+        stemmed_tokens.append(stemmer.stem(token))
+
+    return stemmed_tokens
