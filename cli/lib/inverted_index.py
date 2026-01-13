@@ -2,13 +2,16 @@ import pickle
 from .search_utils import load_movies, CACHE_DIR, tokenize_text
 from typing import Dict, Set
 import os 
+from collections import Counter, defaultdict
 
 class InvertedIndex():
     def __init__(self):
         self.index: Dict[str, Set[int]] = {}
         self.docmap: Dict[int, dict] = {}
+        self.term_frequencies: Dict[int, Counter] = {}
         self.index_path = os.path.join(CACHE_DIR, "index.pkl")
         self.docmap_path = os.path.join(CACHE_DIR, "docmap.pkl")
+        self.term_frequencies_path = os.path.join(CACHE_DIR, "term_frequencies.pkl")
 
     
     def __add_document(self, doc_id: int, text: str):
@@ -17,6 +20,7 @@ class InvertedIndex():
             if token not in self.index:
                 self.index[token] = set()
             self.index[token].add(doc_id) 
+        self.term_frequencies[doc_id] = Counter(tokens)
     
     def get_documents(self, term) ->  list[int]:
         if term not in self.index:
@@ -39,20 +43,46 @@ class InvertedIndex():
 
         with open(self.docmap_path, "wb") as f:
             pickle.dump(self.docmap, f)
-    
+        
+        with open(self.term_frequencies_path, "wb") as f:
+            pickle.dump(self.term_frequencies, f)
+
     def load(self, cache_dir: str = CACHE_DIR):
         if not os.path.exists(self.index_path):
             raise FileNotFoundError(f"Missing file: {self.index_path}")
         if not os.path.exists(self.docmap_path):
             raise FileNotFoundError(f"Missing file: {self.docmap_path}")
+        if not os.path.exists(self.term_frequencies_path):
+            raise FileNotFoundError(f"Missing file: {self.term_frequencies_path}")
 
         with open(self.index_path, "rb") as f:
             self.index = pickle.load(f)
         with open(self.docmap_path, "rb") as f:
             self.docmap = pickle.load(f)
+        with open(self.term_frequencies_path, "rb") as f:
+            self.term_frequencies = pickle.load(f)
+    
+    def get_tf(self, doc_id, term):
+
+        token = tokenize_text(term)
+        if len(token) != 1:
+            raise Exception("term has more than one token")
+        
+        token = token[0]
+        if doc_id not in self.term_frequencies:
+            return 0 
+        if token not in self.term_frequencies[doc_id]:
+            return 0
+        return self.term_frequencies[doc_id][token]
         
 
-def build_comand() -> None:
+def build_command() -> None:
     idx = InvertedIndex()
     idx.build()
     idx.save()
+
+def tf_command(doc_id: int, term: str) -> str:
+    indx = InvertedIndex()
+    indx.load()
+    num = indx.get_tf(doc_id, term)
+    print(num)

@@ -3,7 +3,7 @@
 import argparse
 import json
 from lib.keyword_search import search 
-from lib.inverted_index import build_comand
+from lib.inverted_index import build_command, tf_command
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Keyword Search CLI")
@@ -14,14 +14,20 @@ def main() -> None:
 
     subparsers.add_parser("build", help="Build the inverted index")
 
+    tf_parser = subparsers.add_parser("tf", help="get the term frequency")
+    tf_parser.add_argument("doc_id", type=int, help="document id to serch the term")
+    tf_parser.add_argument("term", type=str, help="term to search in the document for give doc_id")
+
 
     args = parser.parse_args()
 
     match args.command:
         case "build": 
             print("Building inverted index...")
-            build_comand()
+            build_command()
             print("Inverted index built successfully.")
+        case "tf":
+            tf_command(args.doc_id, args.term)
         case "search":
             print(f"Searching for: {args.query}")
             results = search(args.query)
