@@ -95,3 +95,6 @@ def idf_command(term: str) -> int:
     total_doc_count = len(indx.docmap)
     idf_val = math.log((total_doc_count + 1) / (term_match_doc_count + 1))
     return idf_val
+
+def tfidf_command(doc_id: int, term: str) -> float:
+    return tf_command(doc_id, term) * idf_command(term)

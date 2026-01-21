@@ -3,7 +3,7 @@
 import argparse
 import json
 from lib.keyword_search import search 
-from lib.inverted_index import build_command, tf_command, idf_command
+from lib.inverted_index import build_command, tf_command, idf_command, tfidf_command 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Keyword Search CLI")
@@ -21,6 +21,11 @@ def main() -> None:
     idf_parser = subparsers.add_parser("idf", help="get the inverse document frequency")
     idf_parser.add_argument("term", help="term to search for the idf")
 
+    tfidf_parser = subparsers.add_parser("tfidf", help="get the term frequency-inverse document frequency")
+    tfidf_parser.add_argument("doc_id", type=int, help="document id to serch the term")
+    tfidf_parser.add_argument("term", type=str, help="term to search in the document for give doc_id")
+
+
     args = parser.parse_args()
 
     match args.command:
@@ -28,6 +33,9 @@ def main() -> None:
             print("Building inverted index...")
             build_command()
             print("Inverted index built successfully.")
+        case "tfidf":
+            tfidf_val = tfidf_command(args.doc_id, args.term)
+            print(f"TF-IDF score of '{args.term}' in document '{args.doc_id}': {tfidf_val:.2f}")
         case "tf":
             tf_val = tf_command(args.doc_id, args.term)
             print(tf_val)
