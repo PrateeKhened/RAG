@@ -3,6 +3,7 @@ from .search_utils import load_movies, CACHE_DIR, tokenize_text
 from typing import Dict, Set
 import os 
 from collections import Counter, defaultdict
+import math
 
 class InvertedIndex():
     def __init__(self):
@@ -12,7 +13,6 @@ class InvertedIndex():
         self.index_path = os.path.join(CACHE_DIR, "index.pkl")
         self.docmap_path = os.path.join(CACHE_DIR, "docmap.pkl")
         self.term_frequencies_path = os.path.join(CACHE_DIR, "term_frequencies.pkl")
-
     
     def __add_document(self, doc_id: int, text: str):
         tokens = tokenize_text(text)
@@ -23,9 +23,10 @@ class InvertedIndex():
         self.term_frequencies[doc_id] = Counter(tokens)
     
     def get_documents(self, term) ->  list[int]:
-        if term not in self.index:
+        tokenised_term = tokenize_text(term)[0]
+        if tokenised_term not in self.index:
             return []
-        return sorted(list(self.index[term]))
+        return sorted(list(self.index[tokenised_term]))
 
     def build(self):
         movies = load_movies()
@@ -81,8 +82,16 @@ def build_command() -> None:
     idx.build()
     idx.save()
 
-def tf_command(doc_id: int, term: str) -> str:
+def tf_command(doc_id: int, term: str) -> int:
     indx = InvertedIndex()
     indx.load()
     num = indx.get_tf(doc_id, term)
-    print(num)
+    return num
+
+def idf_command(term: str) -> int:
+    indx = InvertedIndex()
+    indx.load()
+    term_match_doc_count = len(indx.get_documents(term))
+    total_doc_count = len(indx.docmap)
+    idf_val = math.log((total_doc_count + 1) / (term_match_doc_count + 1))
+    return idf_val
