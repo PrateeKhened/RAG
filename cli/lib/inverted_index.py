@@ -23,10 +23,9 @@ class InvertedIndex():
         self.term_frequencies[doc_id] = Counter(tokens)
     
     def get_documents(self, term) ->  list[int]:
-        tokenised_term = tokenize_text(term)[0]
-        if tokenised_term not in self.index:
+        if term not in self.index:
             return []
-        return sorted(list(self.index[tokenised_term]))
+        return sorted(list(self.index[term]))
 
     def build(self):
         movies = load_movies()
@@ -64,7 +63,6 @@ class InvertedIndex():
             self.term_frequencies = pickle.load(f)
     
     def get_tf(self, doc_id, term):
-
         token = tokenize_text(term)
         if len(token) != 1:
             raise Exception("term has more than one token")
@@ -75,7 +73,23 @@ class InvertedIndex():
         if token not in self.term_frequencies[doc_id]:
             return 0
         return self.term_frequencies[doc_id][token]
+    
+    def get_idf(self, term):
+        token = tokenize_text(term)
+        if len(token) != 1:
+            raise Exception("term has more then one token")
         
+        token = token[0]
+        term_match_doc_count = len(self.get_documents(token))
+        total_doc_count = len(self.docmap)
+        idf_val = math.log((total_doc_count + 1) / (term_match_doc_count + 1))
+        return idf_val
+
+    def get_tf_idf(self, doc_id: int, term: str) -> float:
+        tf = self.get_tf(doc_id, term)
+        idf = self.get_idf(term)
+        return tf * idf
+
 
 def build_command() -> None:
     idx = InvertedIndex()
@@ -91,10 +105,9 @@ def tf_command(doc_id: int, term: str) -> int:
 def idf_command(term: str) -> int:
     indx = InvertedIndex()
     indx.load()
-    term_match_doc_count = len(indx.get_documents(term))
-    total_doc_count = len(indx.docmap)
-    idf_val = math.log((total_doc_count + 1) / (term_match_doc_count + 1))
-    return idf_val
+    return indx.get_idf(term)
 
 def tfidf_command(doc_id: int, term: str) -> float:
-    return tf_command(doc_id, term) * idf_command(term)
+    indx = InvertedIndex()
+    indx.load()
+    return indx.get_tf_idf(doc_id, term)
