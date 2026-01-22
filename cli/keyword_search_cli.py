@@ -3,7 +3,7 @@
 import argparse
 import json
 from lib.keyword_search import search 
-from lib.inverted_index import build_command, tf_command, idf_command, tfidf_command 
+from lib.inverted_index import build_command, tf_command, idf_command, tfidf_command, bm25_idf_command
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Keyword Search CLI")
@@ -25,6 +25,8 @@ def main() -> None:
     tfidf_parser.add_argument("doc_id", type=int, help="document id to serch the term")
     tfidf_parser.add_argument("term", type=str, help="term to search in the document for give doc_id")
 
+    bm25_idf_parser = subparsers.add_parser("bm25idf", help="Get BM25 IDF score for a given term")
+    bm25_idf_parser.add_argument("term", type=str, help="Term to get BM25 IDF score for")
 
     args = parser.parse_args()
 
@@ -33,6 +35,9 @@ def main() -> None:
             print("Building inverted index...")
             build_command()
             print("Inverted index built successfully.")
+        case "bm25idf":
+            bm25idf = bm25_idf_command(args.term)
+            print(f"BM25 IDF score of '{args.term}': {bm25idf:.2f}")
         case "tfidf":
             tfidf_val = tfidf_command(args.doc_id, args.term)
             print(f"TF-IDF score of '{args.term}' in document '{args.doc_id}': {tfidf_val:.2f}")
