@@ -4,7 +4,7 @@ import argparse
 import json
 from lib.keyword_search import search 
 from lib.inverted_index import build_command, tf_command, idf_command, tfidf_command, bm25_idf_command, bm25_tf_command
-from lib.search_utils import BM25_K1
+from lib.search_utils import BM25_K1, BM25_B
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Keyword Search CLI")
@@ -33,6 +33,7 @@ def main() -> None:
     bm25_tf_parser.add_argument("doc_id", type=int, help="Document ID")
     bm25_tf_parser.add_argument("term", type=str, help="Term to get BM25 TF score for")
     bm25_tf_parser.add_argument("k1", type=float, nargs='?', default=BM25_K1, help="Tunable BM25 K1 parameter")
+    bm25_tf_parser.add_argument("b", type=float, nargs='?', default=BM25_B, help="Tunable BM25 b parameter")
 
     args = parser.parse_args()
 
@@ -42,7 +43,7 @@ def main() -> None:
             build_command()
             print("Inverted index built successfully.")
         case "bm25tf":
-            bm25tf = bm25_tf_command(args.doc_id, args.term, args.k1)
+            bm25tf = bm25_tf_command(args.doc_id, args.term, args.k1, args.b)
             print(f"BM25 TF score of '{args.term}' in document '{args.doc_id}': {bm25tf:.2f}")
         case "bm25idf":
             bm25idf = bm25_idf_command(args.term)
