@@ -1,5 +1,5 @@
 import pickle
-from .search_utils import load_movies, CACHE_DIR, tokenize_text
+from .search_utils import load_movies, CACHE_DIR, tokenize_text, BM25_K1
 from typing import Dict, Set
 import os 
 from collections import Counter, defaultdict
@@ -100,8 +100,11 @@ class InvertedIndex():
         total_doc_count = len(self.docmap)
         idf_val = math.log((total_doc_count - term_match_doc_count + 0.5) / (term_match_doc_count + 0.5) + 1)
         return idf_val
-
-
+    
+    def get_bm25_tf(self, doc_id, term, k1=BM25_K1):
+        tf = self.get_tf(doc_id, term)
+        bm25_tf = (tf * (k1 + 1)) / (tf + k1)
+        return bm25_tf
 
 def build_command() -> None:
     idx = InvertedIndex()
@@ -128,3 +131,9 @@ def bm25_idf_command(term: str):
     indx = InvertedIndex() 
     indx.load() 
     return indx.get_bm25_idf(term)
+
+def bm25_tf_command(doc_id, term, k1=BM25_K1):
+    indx = InvertedIndex() 
+    indx.load() 
+    return indx.get_bm25_tf(doc_id, term, k1)
+    
