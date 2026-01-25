@@ -81,7 +81,6 @@ def embed_query_text(query):
     print(f"First 5 dimensions: {embedding[:5]}")
     print(f"Shape: {embedding.shape}")
 
-# know this now and learn
 def cosine_similarity(vec1, vec2):
     dot_product = np.dot(vec1, vec2)
     norm1 = np.linalg.norm(vec1)
