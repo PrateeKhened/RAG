@@ -2,8 +2,15 @@
 
 import argparse
 import json
-from lib.keyword_search import search 
-from lib.inverted_index import build_command, tf_command, idf_command, tfidf_command, bm25_idf_command, bm25_tf_command, InvertedIndex
+from lib.keyword_search import (
+    build_command, 
+    tf_command, 
+    idf_command, 
+    tfidf_command, 
+    bm25_idf_command, 
+    bm25_tf_command, 
+    InvertedIndex, 
+    search)
 from lib.search_utils import BM25_K1, BM25_B
 
 def main() -> None:
