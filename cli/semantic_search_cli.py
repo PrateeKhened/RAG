@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import argparse
-from lib.semantic_search import verify_model, embed_text, verify_embeddings, embed_query_text
+from lib.semantic_search import verify_model, embed_text, verify_embeddings, embed_query_text, SemanticSearch
+import json
+from lib.search_utils import DATA_PATH
 
 def main():
     parser = argparse.ArgumentParser(description="Semantic Search CLI")
@@ -17,9 +19,23 @@ def main():
     qembed_parser = subparsers.add_parser("embedquery", help="embed the user query")
     qembed_parser.add_argument("query", type=str, help="query to convert to embed")
 
+    search_parser = subparsers.add_parser("search", help="find your movie")
+    search_parser.add_argument("query", type=str, help="query to search the movie")
+    search_parser.add_argument("--limit", type=int, default=5, help="Max results to show(default is 5)")
+
     args = parser.parse_args()
 
     match args.command:
+        case "search":
+            ss = SemanticSearch() 
+            with open(DATA_PATH, "r") as f:
+                movies = json.load(f)
+                documents = movies["movies"]
+            ss.load_or_create_embeddings(documents)
+            results = ss.search(args.query, args.limit)
+            for i, res in enumerate(results, 1):
+                print(f"{i}. {res["title"]} (score: {res["score"]})")
+                print(f"{res["description"]}\n\n")
         case "embedquery":
             embed_query_text(args.query)
         case "verify_embeddings":
