@@ -1,7 +1,7 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
 import os
-from lib.search_utils import CACHE_DIR, DATA_PATH
+from lib.search_utils import CACHE_DIR, DATA_PATH, DEFAULT_CHUNK_SIZE
 import json
 
 class SemanticSearch(): 
@@ -89,3 +89,21 @@ def cosine_similarity(vec1, vec2):
         return 0.0
 
     return dot_product / (norm1 * norm2)
+
+def fixed_size_chunking(text: str, chunk_size: int=DEFAULT_CHUNK_SIZE) -> list[list]:
+    words = text.split() 
+    chunks = [] 
+
+    n_words = len(words)
+    i = 0 
+    while i < n_words:
+        chunk_words = words[i : i + chunk_size]
+        chunks.append(" ".join(chunk_words))
+        i += chunk_size
+    return chunks
+
+def chunk_text(text: str, chunk_size: int = DEFAULT_CHUNK_SIZE) -> None:
+    chunks = fixed_size_chunking(text, chunk_size)
+    print(f"Chunking {len(text)} characters")
+    for i, chunk in enumerate(chunks):
+        print(f"{i + 1}. {chunk}")
