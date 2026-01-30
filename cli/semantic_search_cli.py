@@ -26,12 +26,13 @@ def main():
     chunk_parser = subparsers.add_parser("chunk", help="chunk the text")
     chunk_parser.add_argument("text", type=str, help="text to chunk")
     chunk_parser.add_argument("--chunk-size", type=int, default=DEFAULT_CHUNK_SIZE, help="size of the chunk(default chunk size = 200)")
+    chunk_parser.add_argument("--overlap", type=int, help="size of the overlap")
 
     args = parser.parse_args()
 
     match args.command:
         case "chunk":
-            chunk_text(args.text, args.chunk_size)
+            chunk_text(args.text, args.overlap, args.chunk_size)
         case "search":
             ss = SemanticSearch() 
             with open(DATA_PATH, "r") as f:
