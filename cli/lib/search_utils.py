@@ -15,6 +15,9 @@ BM25_K1 = 1.5
 BM25_B = 0.75
 
 DEFAULT_CHUNK_SIZE = 200
+MAX_CHUNK_SIZE = 4
+
+DEFAULT_OVERLAP_SIZE = 0
 
 def load_movies() -> list[dict]:
     with open(DATA_PATH, "r") as f:

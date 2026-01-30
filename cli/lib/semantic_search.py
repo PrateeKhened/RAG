@@ -1,8 +1,9 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
 import os
-from lib.search_utils import CACHE_DIR, DATA_PATH, DEFAULT_CHUNK_SIZE
+from lib.search_utils import CACHE_DIR, DATA_PATH, DEFAULT_CHUNK_SIZE, MAX_CHUNK_SIZE, DEFAULT_OVERLAP_SIZE
 import json
+import re
 
 class SemanticSearch(): 
     def __init__(self):
@@ -105,5 +106,23 @@ def fixed_size_chunking(text: str, overlap_chunk: int, chunk_size: int=DEFAULT_C
 def chunk_text(text: str, overlap_chunk: int ,chunk_size: int = DEFAULT_CHUNK_SIZE) -> None:
     chunks = fixed_size_chunking(text, overlap_chunk, chunk_size)
     print(f"Chunking {len(text)} characters")
+    for i, chunk in enumerate(chunks):
+        print(f"{i + 1}. {chunk}")
+
+def semantic_chunk(text: str, overlap_chunk: int=DEFAULT_OVERLAP_SIZE, max_chunk_size: int=MAX_CHUNK_SIZE) -> list[str]:
+    words = re.split(r'(?<=[.!?])\s+', text)
+    chunks = []
+
+    n_words = len(words)
+    i = 0 
+    while i < n_words:
+        chunk_words = words[i: i + max_chunk_size]
+        chunks.append(" ".join(chunk_words))
+        i += max_chunk_size - overlap_chunk
+    return chunks
+    
+def semantic_chunk_text(text: str, overlap_chunk: int = DEFAULT_OVERLAP_SIZE, max_chunk_size: int = DEFAULT_CHUNK_SIZE) -> None:
+    chunks = semantic_chunk(text, overlap_chunk, max_chunk_size)
+    print(f"Semantically chunking {len(text)} characters")
     for i, chunk in enumerate(chunks):
         print(f"{i + 1}. {chunk}")
