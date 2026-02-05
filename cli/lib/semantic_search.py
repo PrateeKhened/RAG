@@ -6,7 +6,7 @@ import json
 import re
 
 class SemanticSearch(): 
-    def __init__(self):
+    def __init__(self, model_name="all-MiniLM-L6-v2"):
         self.model = SentenceTransformer('all-MiniLM-L6-v2')
         self.embeddings = None
         self.documents = None
@@ -110,14 +110,16 @@ def chunk_text(text: str, overlap_chunk: int ,chunk_size: int = DEFAULT_CHUNK_SI
         print(f"{i + 1}. {chunk}")
 
 def semantic_chunk(text: str, overlap_chunk: int=DEFAULT_OVERLAP_SIZE, max_chunk_size: int=MAX_CHUNK_SIZE) -> list[str]:
-    words = re.split(r'(?<=[.!?])\s+', text)
+    sentences = re.split(r'(?<=[.!?])\s+', text)
     chunks = []
 
-    n_words = len(words)
+    n_sentences = len(sentences)
     i = 0 
-    while i < n_words:
-        chunk_words = words[i: i + max_chunk_size]
-        chunks.append(" ".join(chunk_words))
+    while i < n_sentences:
+        chunk_sentences = sentences[i: i + max_chunk_size]
+        if chunks and len(chunk_sentences) <= overlap_chunk:
+            break
+        chunks.append(" ".join(chunk_sentences))
         i += max_chunk_size - overlap_chunk
     return chunks
     

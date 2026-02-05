@@ -4,6 +4,7 @@ import argparse
 from lib.semantic_search import verify_model, embed_text, verify_embeddings, embed_query_text, SemanticSearch, chunk_text, semantic_chunk_text
 import json
 from lib.search_utils import DATA_PATH, DEFAULT_CHUNK_SIZE, MAX_CHUNK_SIZE, DEFAULT_OVERLAP_SIZE
+from lib.chunked_semantic_search import ChunkedSemanticSearch
 
 def main():
     parser = argparse.ArgumentParser(description="Semantic Search CLI")
@@ -33,9 +34,20 @@ def main():
     semantic_chunk_parser.add_argument("--max-chunk-size", type=int, default=DEFAULT_CHUNK_SIZE, help="set maximum size of each chunk")
     semantic_chunk_parser.add_argument("--overlap", type=int, default=DEFAULT_OVERLAP_SIZE, help="the size of the overlap for next chunk")
 
+    embed_chunks_parser = subparsers.add_parser("embed_chunks", help="lets embed the chunks")
+
+
     args = parser.parse_args()
 
     match args.command:
+        case "embed_chunks":
+            with open(DATA_PATH, "r") as f:
+                movies = json.load(f)
+                documents = movies["movies"]
+            css = ChunkedSemanticSearch()
+            css.load_or_create_chunk_embeddings(documents)
+            print(f"Generated {len(css.chunk_embeddings)} chunked embeddings")
+
         case "semantic_chunk":
             semantic_chunk_text(args.text, args.overlap, args.max_chunk_size)
         case "chunk":
